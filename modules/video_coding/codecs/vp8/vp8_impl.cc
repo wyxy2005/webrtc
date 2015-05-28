@@ -787,6 +787,8 @@ int VP8EncoderImpl::Encode(
       return WEBRTC_VIDEO_CODEC_OK;
     }
     flags[i] = ret;
+	// Never reference previous frame. It breaks decoding of sequential non-key frames if one non-key frame is lost.
+	flags[i] |= VP8_EFLAG_NO_REF_LAST;
   }
   bool send_key_frame = false;
   for (size_t i = 0; i < key_frame_request_.size() && i < send_stream_.size();
@@ -839,6 +841,8 @@ int VP8EncoderImpl::Encode(
       for (size_t i = 0; i < encoders_.size(); ++i) {
         flags[i] = rps_.EncodeFlags(picture_id_[i], sendRefresh,
                                     input_image.timestamp());
+		// Never reference previous frame. It breaks decoding of sequential non-key frames if one non-key frame is lost.
+		flags[i] |= VP8_EFLAG_NO_REF_LAST;
       }
     } else {
       if (codec_specific_info->codecSpecific.VP8.hasReceivedRPSI) {
